@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>AI Video Enhancement</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .file-input {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .file-input input[type="file"] {
+            display: none;
+        }
+
+        .file-input label {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .enhance-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .enhance-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #007bff;
+        }
+
+        .result-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result-container video {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .video-preview {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .video-preview video {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Enhance Your Video Quality</h1>
+        <p class="description">Upload your video to enhance its quality using AI.</p>
+
+        <div class="file-input">
+            <input type="file" id="videoUpload" accept="video/*">
+            <label for="videoUpload">Choose Video</label>
+        </div>
+
+        <!-- Video Preview -->
+        <div class="video-preview" id="videoPreview">
+            <video id="videoPlayer" controls></video>
+        </div>
+
+        <button class="enhance-btn" id="enhanceBtn">Enhance Video</button>
+
+        <div class="loading" id="loadingMessage">Processing...</div>
+
+        <div class="result-container" id="resultContainer">
+            <h3>Enhanced Video</h3>
+            <video id="enhancedVideo" controls></video>
+        </div>
+    </div>
+
+    <script>
+        // Get the elements
+        const videoUpload = document.getElementById('videoUpload');
+        const enhanceBtn = document.getElementById('enhanceBtn');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const resultContainer = document.getElementById('resultContainer');
+        const enhancedVideo = document.getElementById('enhancedVideo');
+        const videoPreview = document.getElementById('videoPreview');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        // Handle video file selection
+        videoUpload.addEventListener('change', function () {
+            const file = videoUpload.files[0];
+            if (file) {
+                // Show the video preview
+                videoPreview.style.display = 'block';
+                const videoURL = URL.createObjectURL(file);
+                videoPlayer.src = videoURL;
+            }
+        });
+
+        // Handle video enhancement button click
+        enhanceBtn.addEventListener('click', () => {
+            const file = videoUpload.files[0];
+            if (!file) {
+                alert('Please select a video file.');
+                return;
+            }
+
+            // Display loading message
+            loadingMessage.style.display = 'block';
+
+            // Simulate video enhancement (Replace with actual API call)
+            setTimeout(() => {
+                // Hide the loading message
+                loadingMessage.style.display = 'none';
+
+                // Show result (replace with actual processed video)
+                resultContainer.style.display = 'block';
+                enhancedVideo.src = URL.createObjectURL(file); // Display uploaded video for now
+            }, 3000); // Simulate a 3-second delay for processing
+        });
+    </script>
+
+</body>
+
+</html>
+
