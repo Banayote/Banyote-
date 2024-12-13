@@ -17,12 +17,13 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            flex-direction: column;
         }
 
         .container {
             text-align: center;
             background: white;
-            padding: 40px;
+            padding: 5px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 500px;
@@ -84,6 +85,7 @@
         .result-container {
             margin-top: 20px;
             display: none;
+            position: relative;
         }
 
         .result-container video {
@@ -100,6 +102,7 @@
             margin: 0 auto;
             border: 1px solid #ddd;
             border-radius: 8px;
+            position: relative;
         }
 
         .video-preview video {
@@ -107,14 +110,46 @@
             height: auto;
             border-radius: 8px;
         }
-    </style>
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+       .instagram-link {
+        display: inline-block;
+        margin-top: 10px; /* Reduced margin to move it up */
+        text-decoration: none;
+        position: relative;
+        top: -20px; /* Adjusted position to move it higher */
+    }
+
+    .instagram-icon {
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+    }
+</style>
 </head>
 
 <body>
 
     <div class="container">
         <h1>Enhance Your Video Quality</h1>
-        <p class="description">Upload your video to enhance its quality using AI.</p>
+        <p class="description">Upload your video to enhance its quality using AI made by Banyote99 zeno.</p>
+
+        <a class="instagram-link" href="https://www.instagram.com/banyote99/profilecard/?igsh=MTE0Mmw0MnNxbm56bw==" target="_blank">
+            <img class="instagram-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+        </a>
 
         <div class="file-input">
             <input type="file" id="videoUpload" accept="video/*">
@@ -124,6 +159,7 @@
         <!-- Video Preview -->
         <div class="video-preview" id="videoPreview">
             <video id="videoPlayer" controls></video>
+            <button class="remove-btn" id="removePreviewBtn">X</button>
         </div>
 
         <button class="enhance-btn" id="enhanceBtn">Enhance Video</button>
@@ -133,6 +169,7 @@
         <div class="result-container" id="resultContainer">
             <h3>Enhanced Video</h3>
             <video id="enhancedVideo" controls></video>
+            <button class="remove-btn" id="removeEnhancedBtn">X</button>
         </div>
     </div>
 
@@ -145,6 +182,8 @@
         const enhancedVideo = document.getElementById('enhancedVideo');
         const videoPreview = document.getElementById('videoPreview');
         const videoPlayer = document.getElementById('videoPlayer');
+        const removePreviewBtn = document.getElementById('removePreviewBtn');
+        const removeEnhancedBtn = document.getElementById('removeEnhancedBtn');
 
         // Handle video file selection
         videoUpload.addEventListener('change', function () {
@@ -155,6 +194,13 @@
                 const videoURL = URL.createObjectURL(file);
                 videoPlayer.src = videoURL;
             }
+        });
+
+        // Handle remove button click for preview
+        removePreviewBtn.addEventListener('click', () => {
+            videoPreview.style.display = 'none';
+            videoPlayer.src = '';
+            videoUpload.value = ''; // Clear file input
         });
 
         // Handle video enhancement button click
@@ -176,7 +222,16 @@
                 // Show result (replace with actual processed video)
                 resultContainer.style.display = 'block';
                 enhancedVideo.src = URL.createObjectURL(file); // Display uploaded video for now
+
+                // Scroll to enhanced video
+                enhancedVideo.scrollIntoView({ behavior: 'smooth' });
             }, 3000); // Simulate a 3-second delay for processing
+        });
+
+        // Handle remove button click for enhanced video
+        removeEnhancedBtn.addEventListener('click', () => {
+            resultContainer.style.display = 'none';
+            enhancedVideo.src = '';
         });
     </script>
 
