@@ -125,20 +125,20 @@
             cursor: pointer;
         }
 
-       .instagram-link {
-        display: inline-block;
-        margin-top: 10px; /* Reduced margin to move it up */
-        text-decoration: none;
-        position: relative;
-        top: -20px; /* Adjusted position to move it higher */
-    }
+        .instagram-link {
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+            position: relative;
+            top: -20px;
+        }
 
-    .instagram-icon {
-        width: 30px;
-        height: 30px;
-        cursor: pointer;
-    }
-</style>
+        .instagram-icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
@@ -174,7 +174,6 @@
     </div>
 
     <script>
-        // Get the elements
         const videoUpload = document.getElementById('videoUpload');
         const enhanceBtn = document.getElementById('enhanceBtn');
         const loadingMessage = document.getElementById('loadingMessage');
@@ -204,7 +203,7 @@
         });
 
         // Handle video enhancement button click
-        enhanceBtn.addEventListener('click', () => {
+        enhanceBtn.addEventListener('click', async () => {
             const file = videoUpload.files[0];
             if (!file) {
                 alert('Please select a video file.');
@@ -214,18 +213,38 @@
             // Display loading message
             loadingMessage.style.display = 'block';
 
-            // Simulate video enhancement (Replace with actual API call)
-            setTimeout(() => {
-                // Hide the loading message
+            // Form data for sending video to the server
+            const formData = new FormData();
+            formData.append('video', file);
+
+            // Make API request to enhance video
+            try {
+                const response = await fetch('/api/enhance', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Video enhancement failed.');
+                }
+
+                // Get the enhanced video from the response
+                const blob = await response.blob();
+                const videoURL = URL.createObjectURL(blob);
+
+                // Hide loading message
                 loadingMessage.style.display = 'none';
 
-                // Show result (replace with actual processed video)
+                // Show enhanced video
                 resultContainer.style.display = 'block';
-                enhancedVideo.src = URL.createObjectURL(file); // Display uploaded video for now
+                enhancedVideo.src = videoURL;
 
                 // Scroll to enhanced video
                 enhancedVideo.scrollIntoView({ behavior: 'smooth' });
-            }, 3000); // Simulate a 3-second delay for processing
+            } catch (error) {
+                loadingMessage.style.display = 'none';
+                alert('An error occurred while enhancing the video.');
+            }
         });
 
         // Handle remove button click for enhanced video
@@ -238,4 +257,3 @@
 </body>
 
 </html>
-
