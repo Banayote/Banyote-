@@ -1,5 +1,4 @@
-Flask
-opencv-python
-werkzeug
-torch
-realesrgan
+Flask==2.2.3
+torch==1.13.1
+opencv-python==4.7.0.72
+werkzeug==2.2.3
