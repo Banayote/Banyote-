@@ -1,3 +1,5 @@
-flask
-werkzeug
+Flask
 opencv-python
+werkzeug
+torch
+realesrgan
