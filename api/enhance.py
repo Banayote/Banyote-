@@ -1,57 +1,60 @@
 import os
 import torch
 import cv2
-import cloudinary
-import cloudinary.uploader
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
+import cloudinary.uploader  # Import Cloudinary's uploader module
 
-# Configure Cloudinary with your API credentials
+# Cloudinary Configuration
 cloudinary.config(
-    cloud_name = "dk2ginl42",  # Your Cloud Name
-    api_key = "jkZM7lp2RTCcHAYlIMpgub2Pv7E",  # Your API Key
-    api_secret = "386593879163922"  # Your API Secret
+    cloud_name="dk2ginl42",  # Replace with your Cloudinary cloud name
+    api_key="jkZM7lp2RTCcHAYlIMpgub2Pv7E",  # Replace with your Cloudinary API key
+    api_secret="386593879163922"  # Replace with your Cloudinary API secret
 )
 
-# Paths to store uploaded and enhanced videos
+# Paths to store temporary files
 UPLOAD_FOLDER = "/tmp/uploads/"
 RESULT_FOLDER = "/tmp/results/"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 
-# Load the AI model (a simple model placeholder)
-model = torch.hub.load('pytorch/vision', 'resnet18', pretrained=True)  # Placeholder for AI model
+# Load the AI model (as a placeholder, resnet18 is being used here)
+model = torch.hub.load("pytorch/vision", "resnet18", pretrained=True)  # Replace with your AI model
 
 # Initialize Flask app
 app = Flask(__name__)
 
 @app.route("/api/enhance", methods=["POST"])
 def enhance_video():
-    if "video" not in request.files:
-        return jsonify({"error": "No video file provided"}), 400
+    # Check if a file URL is provided
+    if "file_url" not in request.json:
+        return jsonify({"error": "No file URL provided"}), 400
 
-    video = request.files["video"]
-    if video.filename == "":
-        return jsonify({"error": "No selected video file"}), 400
+    file_url = request.json["file_url"]
 
-    # Save the uploaded video temporarily
-    video_path = os.path.join(UPLOAD_FOLDER, secure_filename(video.filename))
-    video.save(video_path)
+    # Download the video from the provided URL
+    video_path = os.path.join(UPLOAD_FOLDER, "input_video.mp4")
+    os.system(f"wget -O {video_path} {file_url}")
 
-    # Process the video for enhancement
-    enhanced_path = os.path.join(RESULT_FOLDER, "enhanced_" + video.filename)
+    # Output path for the enhanced video
+    enhanced_path = os.path.join(RESULT_FOLDER, "enhanced_video.mp4")
 
+    # Open the video for processing
     cap = cv2.VideoCapture(video_path)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter(enhanced_path, fourcc, cap.get(cv2.CAP_PROP_FPS), 
-                          (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
+    out = cv2.VideoWriter(
+        enhanced_path,
+        fourcc,
+        cap.get(cv2.CAP_PROP_FPS),
+        (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    )
 
     while True:
         ret, frame = cap.read()
         if not ret:
             break
-        # Apply enhancement (replace this with your AI model's enhancement logic)
-        enhanced_frame = cv2.detailEnhance(frame, sigma_s=10, sigma_r=0.15)
+        # Enhance the video frame using your AI model or OpenCV logic
+        enhanced_frame = cv2.detailEnhance(frame, sigma_s=10, sigma_r=0.15)  # Replace this with AI model logic
         out.write(enhanced_frame)
 
     cap.release()
@@ -60,12 +63,7 @@ def enhance_video():
     # Upload the enhanced video to Cloudinary
     cloudinary_response = cloudinary.uploader.upload(enhanced_path, resource_type="video")
 
-    # Return the enhanced video URL from Cloudinary as a response
-    return jsonify({"message": "Video enhanced and uploaded", "video_url": cloudinary_response["url"]})
-
-# Vercel handler to work with serverless functions
-def handler(req):
-    return app(req)
-
+    # Return the Cloudinary URL of the enhanced video
+    return jsonify({"message": "Video enhanced successfully", "video_url": cloudinary_response["url"]})
 
 
