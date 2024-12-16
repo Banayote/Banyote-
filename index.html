@@ -93,51 +93,6 @@
             border-radius: 8px;
             margin-top: 10px;
         }
-
-        .video-preview {
-            display: none;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            position: relative;
-        }
-
-        .video-preview video {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        .remove-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: white;
-            color: black;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .instagram-link {
-            display: inline-block;
-            margin-top: 10px;
-            text-decoration: none;
-            position: relative;
-            top: -20px;
-        }
-
-        .instagram-icon {
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-        }
     </style>
 </head>
 
@@ -147,29 +102,18 @@
         <h1>Enhance Your Video Quality</h1>
         <p class="description">Upload your video to enhance its quality using AI made by Banyote99 zeno.</p>
 
-        <a class="instagram-link" href="https://www.instagram.com/banyote99/profilecard/?igsh=MTE0Mmw0MnNxbm56bw==" target="_blank">
-            <img class="instagram-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
-        </a>
-
         <div class="file-input">
             <input type="file" id="videoUpload" accept="video/*">
             <label for="videoUpload">Choose Video</label>
         </div>
 
-        <!-- Video Preview -->
-        <div class="video-preview" id="videoPreview">
-            <video id="videoPlayer" controls></video>
-            <button class="remove-btn" id="removePreviewBtn">X</button>
-        </div>
+        <button class="enhance-btn" id="enhanceBtn">Upload & Enhance</button>
 
-        <button class="enhance-btn" id="enhanceBtn">Enhance Video</button>
-
-        <div class="loading" id="loadingMessage">Processing...</div>
+        <div class="loading" id="loadingMessage">Uploading and processing...</div>
 
         <div class="result-container" id="resultContainer">
             <h3>Enhanced Video</h3>
             <video id="enhancedVideo" controls></video>
-            <button class="remove-btn" id="removeEnhancedBtn">X</button>
         </div>
     </div>
 
@@ -179,30 +123,11 @@
         const loadingMessage = document.getElementById('loadingMessage');
         const resultContainer = document.getElementById('resultContainer');
         const enhancedVideo = document.getElementById('enhancedVideo');
-        const videoPreview = document.getElementById('videoPreview');
-        const videoPlayer = document.getElementById('videoPlayer');
-        const removePreviewBtn = document.getElementById('removePreviewBtn');
-        const removeEnhancedBtn = document.getElementById('removeEnhancedBtn');
 
-        // Handle video file selection
-        videoUpload.addEventListener('change', function () {
-            const file = videoUpload.files[0];
-            if (file) {
-                // Show the video preview
-                videoPreview.style.display = 'block';
-                const videoURL = URL.createObjectURL(file);
-                videoPlayer.src = videoURL;
-            }
-        });
+        const CLOUD_NAME = "dk2ginl42"; // Your Cloudinary cloud name
+        const UPLOAD_PRESET = "jkZM7lp2RTCcHAYlIMpgub2Pv7E"; // Your unsigned upload preset
 
-        // Handle remove button click for preview
-        removePreviewBtn.addEventListener('click', () => {
-            videoPreview.style.display = 'none';
-            videoPlayer.src = '';
-            videoUpload.value = ''; // Clear file input
-        });
-
-        // Handle video enhancement button click
+        // Handle the upload and enhancement process
         enhanceBtn.addEventListener('click', async () => {
             const file = videoUpload.files[0];
             if (!file) {
@@ -210,47 +135,33 @@
                 return;
             }
 
-            // Display loading message
-            loadingMessage.style.display = 'block';
+            loadingMessage.style.display = 'block'; // Show loading message
 
-            // Form data for sending video to the server
             const formData = new FormData();
-            formData.append('video', file);
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
 
-            // Make API request to enhance video
             try {
-                const response = await fetch('/api/enhance', {
+                // Upload to Cloudinary
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {
                     method: 'POST',
                     body: formData
                 });
 
                 if (!response.ok) {
-                    throw new Error('Video enhancement failed.');
+                    throw new Error('Failed to upload video.');
                 }
 
-                // Get the enhanced video from the response
-                const blob = await response.blob();
-                const videoURL = URL.createObjectURL(blob);
+                const data = await response.json();
+                const enhancedVideoURL = data.secure_url; // Get Cloudinary URL for the enhanced video
 
-                // Hide loading message
-                loadingMessage.style.display = 'none';
-
-                // Show enhanced video
-                resultContainer.style.display = 'block';
-                enhancedVideo.src = videoURL;
-
-                // Scroll to enhanced video
-                enhancedVideo.scrollIntoView({ behavior: 'smooth' });
+                loadingMessage.style.display = 'none'; // Hide loading message
+                resultContainer.style.display = 'block'; // Show result container
+                enhancedVideo.src = enhancedVideoURL; // Display enhanced video
             } catch (error) {
                 loadingMessage.style.display = 'none';
-                alert('An error occurred while enhancing the video.');
+                alert('An error occurred: ' + error.message);
             }
-        });
-
-        // Handle remove button click for enhanced video
-        removeEnhancedBtn.addEventListener('click', () => {
-            resultContainer.style.display = 'none';
-            enhancedVideo.src = '';
         });
     </script>
 
