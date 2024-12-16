@@ -13,7 +13,7 @@ os.makedirs(RESULT_FOLDER, exist_ok=True)
 
 # Load the AI model (Real-ESRGAN for video enhancement)
 model = RealESRGAN.from_pretrained('RealESRGAN_x4')
-model = model.to('cuda')  # Move to GPU if available
+model = model.to('cuda')  # Move to GPU if available, otherwise use CPU
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -66,3 +66,6 @@ def enhance_video():
 # Vercel handler to work with serverless functions
 def handler(req):
     return app(req)
+
+
+
