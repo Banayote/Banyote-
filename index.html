@@ -124,8 +124,8 @@
         const resultContainer = document.getElementById('resultContainer');
         const enhancedVideo = document.getElementById('enhancedVideo');
 
-        const CLOUD_NAME = "dk2ginl42"; // Your Cloudinary cloud name
-        const UPLOAD_PRESET = "jkZM7lp2RTCcHAYlIMpgub2Pv7E"; // Your unsigned upload preset
+        // Backend API URL (Flask)
+        const API_URL = "http://127.0.0.1:5000/api/enhance";  // Update this URL to match your Flask server URL
 
         // Handle the upload and enhancement process
         enhanceBtn.addEventListener('click', async () => {
@@ -139,21 +139,20 @@
 
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('upload_preset', UPLOAD_PRESET);
 
             try {
-                // Upload to Cloudinary
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`, {
+                // Send the video file to the Flask API for enhancement
+                const response = await fetch(API_URL, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to upload video.');
+                    throw new Error('Failed to upload and enhance video.');
                 }
 
                 const data = await response.json();
-                const enhancedVideoURL = data.secure_url; // Get Cloudinary URL for the enhanced video
+                const enhancedVideoURL = data.video_url; // Get Cloudinary URL for the enhanced video
 
                 loadingMessage.style.display = 'none'; // Hide loading message
                 resultContainer.style.display = 'block'; // Show result container
