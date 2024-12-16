@@ -1,50 +1,71 @@
 import os
 import torch
 import cv2
+import cloudinary
+import cloudinary.uploader
 from flask import Flask, request, jsonify, send_file
 from werkzeug.utils import secure_filename
-import boto3  # AWS SDK to access S3
+
+# Configure Cloudinary with your API credentials
+cloudinary.config(
+    cloud_name = "dk2ginl42",  # Your Cloud Name
+    api_key = "jkZM7lp2RTCcHAYlIMpgub2Pv7E",  # Your API Key
+    api_secret = "386593879163922"  # Your API Secret
+)
+
+# Paths to store uploaded and enhanced videos
+UPLOAD_FOLDER = "/tmp/uploads/"
+RESULT_FOLDER = "/tmp/results/"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(RESULT_FOLDER, exist_ok=True)
+
+# Load the AI model (a simple model placeholder)
+model = torch.hub.load('pytorch/vision', 'resnet18', pretrained=True)  # Placeholder for AI model
 
 # Initialize Flask app
 app = Flask(__name__)
 
 @app.route("/api/enhance", methods=["POST"])
 def enhance_video():
-    if "file_url" not in request.json:
-        return jsonify({"error": "No file URL provided"}), 400
+    if "video" not in request.files:
+        return jsonify({"error": "No video file provided"}), 400
 
-    file_url = request.json["file_url"]
-    
-    # Download file from cloud storage (e.g., AWS S3)
-    s3_client = boto3.client('s3')
-    bucket_name = 'your-bucket-name'
-    object_key = file_url  # This should be the path to your file in S3
-    
-    local_file_path = "/tmp/video.mp4"
-    s3_client.download_file(bucket_name, object_key, local_file_path)
+    video = request.files["video"]
+    if video.filename == "":
+        return jsonify({"error": "No selected video file"}), 400
 
-    # Open the video for processing
-    cap = cv2.VideoCapture(local_file_path)
+    # Save the uploaded video temporarily
+    video_path = os.path.join(UPLOAD_FOLDER, secure_filename(video.filename))
+    video.save(video_path)
+
+    # Process the video for enhancement
+    enhanced_path = os.path.join(RESULT_FOLDER, "enhanced_" + video.filename)
+
+    cap = cv2.VideoCapture(video_path)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    enhanced_path = "/tmp/enhanced_video.mp4"
-    out = cv2.VideoWriter(enhanced_path, fourcc, cap.get(cv2.CAP_PROP_FPS),
+    out = cv2.VideoWriter(enhanced_path, fourcc, cap.get(cv2.CAP_PROP_FPS), 
                           (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
     while True:
         ret, frame = cap.read()
         if not ret:
             break
-        # Enhance frame using your AI model (e.g., RealESRGAN)
-        # Assuming `enhanced_frame` contains the enhanced frame
-        enhanced_frame = frame  # This should be your enhanced frame logic
+        # Apply enhancement (replace this with your AI model's enhancement logic)
+        enhanced_frame = cv2.detailEnhance(frame, sigma_s=10, sigma_r=0.15)
         out.write(enhanced_frame)
 
     cap.release()
     out.release()
 
-    # Return the enhanced video
-    return send_file(enhanced_path, as_attachment=True)
+    # Upload the enhanced video to Cloudinary
+    cloudinary_response = cloudinary.uploader.upload(enhanced_path, resource_type="video")
+
+    # Return the enhanced video URL from Cloudinary as a response
+    return jsonify({"message": "Video enhanced and uploaded", "video_url": cloudinary_response["url"]})
 
 # Vercel handler to work with serverless functions
 def handler(req):
     return app(req)
+
+
+
