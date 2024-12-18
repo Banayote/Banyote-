@@ -7,7 +7,6 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>AI Video Enhancement</title>
     <style>
-        /* Global Styles */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -23,7 +22,7 @@
         .container {
             text-align: center;
             background: white;
-            padding: 20px;
+            padding: 5px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 500px;
@@ -42,11 +41,6 @@
             margin-bottom: 30px;
         }
 
-        .file-input {
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-
         .file-input input[type="file"] {
             display: none;
         }
@@ -57,7 +51,6 @@
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
         }
 
         .enhance-btn {
@@ -85,13 +78,25 @@
         .result-container {
             margin-top: 20px;
             display: none;
-            position: relative;
         }
 
         .result-container video {
             max-width: 100%;
             border-radius: 8px;
+        }
+
+        .instagram-link {
+            display: inline-block;
             margin-top: 10px;
+            text-decoration: none;
+            position: relative;
+            top: -20px;
+        }
+
+        .instagram-icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -100,16 +105,19 @@
 
     <div class="container">
         <h1>Enhance Your Video Quality</h1>
-        <p class="description">Upload your video to enhance its quality using AI made by Banyote99 zeno.</p>
+        <p class="description">Upload your video to enhance its quality using AI made by Banyote99 Zeno.</p>
+
+        <a class="instagram-link" href="https://www.instagram.com/banyote99/profilecard/?igsh=MTE0Mmw0MnNxbm56bw==" target="_blank">
+            <img class="instagram-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+        </a>
 
         <div class="file-input">
             <input type="file" id="videoUpload" accept="video/*">
             <label for="videoUpload">Choose Video</label>
         </div>
 
-        <button class="enhance-btn" id="enhanceBtn">Upload & Enhance</button>
-
-        <div class="loading" id="loadingMessage">Uploading and processing...</div>
+        <button class="enhance-btn" id="enhanceBtn">Enhance Video</button>
+        <div class="loading" id="loadingMessage">Processing with AI...</div>
 
         <div class="result-container" id="resultContainer">
             <h3>Enhanced Video</h3>
@@ -117,6 +125,9 @@
         </div>
     </div>
 
+    <!-- TensorFlow.js and AI Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <script>
         const videoUpload = document.getElementById('videoUpload');
         const enhanceBtn = document.getElementById('enhanceBtn');
@@ -124,10 +135,6 @@
         const resultContainer = document.getElementById('resultContainer');
         const enhancedVideo = document.getElementById('enhancedVideo');
 
-        // Backend API URL (Flask)
-        const API_URL = "http://127.0.0.1:5000/api/enhance";  // Update this URL to match your Flask server URL
-
-        // Handle the upload and enhancement process
         enhanceBtn.addEventListener('click', async () => {
             const file = videoUpload.files[0];
             if (!file) {
@@ -135,35 +142,30 @@
                 return;
             }
 
-            loadingMessage.style.display = 'block'; // Show loading message
+            // Display loading message
+            loadingMessage.style.display = 'block';
 
-            const formData = new FormData();
-            formData.append('file', file);
+            // Load TensorFlow.js AI model
+            const model = await cocoSsd.load();
+            const videoURL = URL.createObjectURL(file);
+            const videoElement = document.createElement('video');
 
-            try {
-                // Send the video file to the Flask API for enhancement
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: formData,
-                });
+            videoElement.src = videoURL;
+            videoElement.addEventListener('loadeddata', async () => {
+                // Run AI detection on the video
+                const predictions = await model.detect(videoElement);
+                console.log('AI Predictions:', predictions);
 
-                if (!response.ok) {
-                    throw new Error('Failed to upload and enhance video.');
-                }
-
-                const data = await response.json();
-                const enhancedVideoURL = data.video_url; // Get Cloudinary URL for the enhanced video
-
-                loadingMessage.style.display = 'none'; // Hide loading message
-                resultContainer.style.display = 'block'; // Show result container
-                enhancedVideo.src = enhancedVideoURL; // Display enhanced video
-            } catch (error) {
+                // Simulate enhanced video (replace with real enhancement in the future)
                 loadingMessage.style.display = 'none';
-                alert('An error occurred: ' + error.message);
-            }
+                enhancedVideo.src = videoURL; // Use uploaded video as placeholder
+                resultContainer.style.display = 'block';
+
+                // Log detected objects for now
+                alert('AI processed your video! Check the console for detected objects.');
+            });
         });
     </script>
-
 </body>
 
 </html>
