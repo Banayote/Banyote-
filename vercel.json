@@ -2,18 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/*.py",
-      "use": "@vercel/python"
-    },
-    {
       "src": "index.html",
       "use": "@vercel/static"
+    },
+    {
+      "src": "api/process.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1.py"
+      "dest": "/api/process.js"
     },
     {
       "src": "/(.*)",
