@@ -10,34 +10,43 @@ export const config = {
 export default async function handler(req, res) {
     try {
         if (req.method === 'POST') {
-            const chunksDir = './temp_chunks';
-            const { chunkIndex, totalChunks, fileName } = req.headers;
-            const filePath = path.join(chunksDir, `${fileName}.part${chunkIndex}`);
+            // Extract headers
+            const chunkIndex = req.headers['chunkindex'];
+            const totalChunks = req.headers['totalchunks'];
+            const fileName = req.headers['filename'];
 
-            // Ensure temp directory exists
+            if (!chunkIndex || !totalChunks || !fileName) {
+                res.status(400).send({ message: 'Missing required headers' });
+                return;
+            }
+
+            const chunksDir = './temp_chunks';
+            const chunkPath = path.join(chunksDir, `${fileName}.part${chunkIndex}`);
+
+            // Ensure the temp directory exists
             await fs.mkdir(chunksDir, { recursive: true });
 
-            // Write the chunk
+            // Write the current chunk to a file
             const chunks = [];
             for await (const chunk of req) {
                 chunks.push(chunk);
             }
-            await fs.writeFile(filePath, Buffer.concat(chunks));
+            await fs.writeFile(chunkPath, Buffer.concat(chunks));
 
             // Check if all chunks are uploaded
             const uploadedChunks = (await fs.readdir(chunksDir))
                 .filter(file => file.startsWith(fileName));
 
             if (uploadedChunks.length === parseInt(totalChunks, 10)) {
-                // Merge all chunks
+                // Merge all chunks into the final file
                 const finalFilePath = path.join('./uploads', fileName);
                 const writeStream = fs.createWriteStream(finalFilePath);
 
                 for (let i = 0; i < totalChunks; i++) {
-                    const chunkPath = path.join(chunksDir, `${fileName}.part${i}`);
-                    const chunkData = await fs.readFile(chunkPath);
-                    writeStream.write(chunkData);
-                    await fs.unlink(chunkPath); // Cleanup chunk
+                    const partPath = path.join(chunksDir, `${fileName}.part${i}`);
+                    const partData = await fs.readFile(partPath);
+                    writeStream.write(partData);
+                    await fs.unlink(partPath); // Delete part after merging
                 }
 
                 writeStream.end();
@@ -49,7 +58,7 @@ export default async function handler(req, res) {
             res.status(405).send({ message: 'Method Not Allowed' });
         }
     } catch (error) {
-        console.error('Error processing upload:', error);
+        console.error('Error handling upload:', error);
         res.status(500).send({ message: 'Internal Server Error' });
     }
 }
