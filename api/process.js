@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
     // Use formidable to parse the incoming file
     const form = new formidable.IncomingForm({
-        maxFileSize: 100 * 1024 * 1024, // Set file size limit to 100MB
+        maxFileSize: 100 * 1024 * 1024, // Set max file size to 100MB
     });
 
     form.parse(req, async (err, fields, files) => {
@@ -60,5 +60,3 @@ export default async function handler(req, res) {
         });
     });
 }
-
-
