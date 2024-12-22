@@ -1,56 +1,37 @@
 import fs from 'fs';
 import path from 'path';
-import { IncomingForm } from 'formidable';
-import { exec } from 'child_process';  // For running FFmpeg or AI processing commands
 
 export const config = {
     api: {
-        bodyParser: false,  // Disable the default body parser
+        bodyParser: false, // Disable default body parser for file uploads
     },
 };
 
-export default function handler(req, res) {
-    const form = new IncomingForm();
-    form.uploadDir = path.join(__dirname, '/uploads');  // Temporary folder to store video files
-    form.keepExtensions = true;
+export default async function handler(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' }); // Only allow POST requests
+    }
+
+    const formidable = await import('formidable');
+    const form = new formidable.IncomingForm({ uploadDir: '/tmp', keepExtensions: true });
 
     form.parse(req, async (err, fields, files) => {
         if (err) {
-            console.error('Error parsing the video:', err);
+            console.error(err);
             return res.status(500).json({ error: 'Error parsing the file' });
         }
 
-        const uploadedVideoPath = files.video[0].filepath;
-        const outputVideoPath = path.join(__dirname, '/uploads/enhanced_video.mp4');
-
-        // Apply AI enhancement (this is an example using FFmpeg for video upscale)
-        try {
-            // Replace with AI model for real enhancement (like ESRGAN or others)
-            await enhanceVideoWithAI(uploadedVideoPath, outputVideoPath);
-
-            // After enhancement, send the URL of the enhanced video back to the frontend
-            res.status(200).json({ videoUrl: `/uploads/enhanced_video.mp4` });
-        } catch (error) {
-            console.error('Error enhancing the video:', error);
-            res.status(500).json({ error: 'Error enhancing video' });
+        const { video } = files; // Assuming you are uploading a video file
+        if (!video) {
+            return res.status(400).json({ error: 'No video file uploaded' });
         }
-    });
-}
 
-// Function for AI enhancement (example using FFmpeg)
-function enhanceVideoWithAI(inputVideo, outputVideo) {
-    return new Promise((resolve, reject) => {
-        // This command upscales the video (replace this with AI model like ESRGAN for better enhancement)
-        const command = `ffmpeg -i ${inputVideo} -vf "scale=1920:1080" ${outputVideo}`;
-        
-        exec(command, (err, stdout, stderr) => {
-            if (err) {
-                console.error('FFmpeg error:', stderr);
-                reject(err);
-            } else {
-                console.log('FFmpeg output:', stdout);
-                resolve();
-            }
-        });
+        // Perform your video enhancement logic here
+
+        // After processing the video, return the URL or path to the enhanced video
+        // For now, just return the file path as a placeholder
+        const enhancedVideoPath = '/path/to/enhanced/video.mp4'; // Replace with actual video path
+
+        res.status(200).json({ enhancedVideoUrl: enhancedVideoPath });
     });
 }
