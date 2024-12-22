@@ -9,7 +9,7 @@ export const config = {
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' }); // Only allow POST requests
+        return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
     const formidable = await import('formidable');
@@ -21,17 +21,16 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Error parsing the file' });
         }
 
-        const { video } = files; // Assuming you are uploading a video file
+        const { video } = files;
         if (!video) {
             return res.status(400).json({ error: 'No video file uploaded' });
         }
 
-        // Perform your video enhancement logic here
+        // Perform video enhancement logic here, e.g., using an AI library or third-party service
 
-        // After processing the video, return the URL or path to the enhanced video
-        // For now, just return the file path as a placeholder
-        const enhancedVideoPath = '/path/to/enhanced/video.mp4'; // Replace with actual video path
+        // For now, return the video as is (you can replace this with actual enhancement logic)
+        const enhancedVideoPath = '/path/to/enhanced/video.mp4'; // Replace with actual enhanced video path
 
-        res.status(200).json({ enhancedVideoUrl: enhancedVideoPath });
+        res.status(200).sendFile(enhancedVideoPath);
     });
 }
