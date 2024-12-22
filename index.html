@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,28 +18,33 @@
             height: 100vh;
             flex-direction: column;
         }
+
         .container {
             text-align: center;
             background: white;
-            padding: 20px;
+            padding: 5px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             max-width: 500px;
             width: 100%;
         }
+
         h1 {
             font-size: 24px;
             color: #333;
             margin-bottom: 20px;
         }
+
         .description {
             font-size: 16px;
             color: #555;
             margin-bottom: 30px;
         }
+
         .file-input input[type="file"] {
             display: none;
         }
+
         .file-input label {
             background-color: #4CAF50;
             color: white;
@@ -46,6 +52,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         .enhance-btn {
             background-color: #007bff;
             color: white;
@@ -56,47 +63,77 @@
             cursor: pointer;
             margin-top: 20px;
         }
+
         .enhance-btn:hover {
             background-color: #0056b3;
         }
+
         .loading {
             display: none;
             margin-top: 20px;
             font-size: 16px;
             color: #007bff;
         }
+
         .result-container {
             margin-top: 20px;
             display: none;
         }
+
         .result-container video {
             max-width: 100%;
             border-radius: 8px;
         }
+
+        .instagram-link {
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+            position: relative;
+            top: -20px;
+        }
+
+        .instagram-icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
     </style>
 </head>
+
 <body>
+
     <div class="container">
         <h1>Enhance Your Video Quality</h1>
-        <p class="description">Upload your video in chunks for enhancement using AI made by Banyote99 Zeno.</p>
+        <p class="description">Upload your video to enhance its quality using AI made by Banyote99 Zeno.</p>
+
+        <a class="instagram-link" href="https://www.instagram.com/banyote99/profilecard/?igsh=MTE0Mmw0MnNxbm56bw==" target="_blank">
+            <img class="instagram-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+        </a>
+
         <div class="file-input">
             <input type="file" id="videoUpload" accept="video/*">
             <label for="videoUpload">Choose Video</label>
         </div>
+
         <button class="enhance-btn" id="enhanceBtn">Enhance Video</button>
         <div class="loading" id="loadingMessage">Processing with AI...</div>
+
         <div class="result-container" id="resultContainer">
             <h3>Enhanced Video</h3>
             <video id="enhancedVideo" controls></video>
         </div>
     </div>
+
+    <!-- TensorFlow.js and AI Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <script>
         const videoUpload = document.getElementById('videoUpload');
         const enhanceBtn = document.getElementById('enhanceBtn');
         const loadingMessage = document.getElementById('loadingMessage');
         const resultContainer = document.getElementById('resultContainer');
         const enhancedVideo = document.getElementById('enhancedVideo');
-
         const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB per chunk
 
         enhanceBtn.addEventListener('click', async () => {
@@ -106,65 +143,67 @@
                 return;
             }
 
+            // Display loading message
             loadingMessage.style.display = 'block';
 
-            try {
-                const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+            // Start uploading the file in chunks
+            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                const start = chunkIndex * CHUNK_SIZE;
+                const end = Math.min(start + CHUNK_SIZE, file.size);
+                const chunk = file.slice(start, end);
 
-                // Upload chunks sequentially
-                for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-                    const start = chunkIndex * CHUNK_SIZE;
-                    const end = Math.min(start + CHUNK_SIZE, file.size);
-                    const chunk = file.slice(start, end);
+                const formData = new FormData();
+                formData.append('chunk', chunk);
+                formData.append('chunkIndex', chunkIndex);
+                formData.append('totalChunks', totalChunks);
+                formData.append('fileName', file.name);
 
-                    const formData = new FormData();
-                    formData.append('chunk', chunk);
-                    formData.append('chunkIndex', chunkIndex);
-                    formData.append('totalChunks', totalChunks);
-                    formData.append('fileName', file.name);
+                console.log(`Uploading chunk ${chunkIndex + 1}/${totalChunks}`);
 
-                    console.log(`Uploading chunk ${chunkIndex + 1}/${totalChunks}`);
-                    
-                    const response = await fetch('https://banyote.vercel.app/api/upload-chunk', {
-                        method: 'POST',
-                        body: formData,
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`Failed to upload chunk ${chunkIndex + 1}/${totalChunks}`);
-                    }
-                }
-
-                console.log('All chunks uploaded successfully.');
-
-                // Notify backend that all chunks are uploaded
-                const mergeResponse = await fetch('https://banyote.vercel.app/api/merge-chunks', {
+                const response = await fetch('https://banyote.vercel.app/api/upload-chunk', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fileName: file.name }),
+                    body: formData,
                 });
 
-                if (!mergeResponse.ok) {
-                    throw new Error('Failed to merge chunks.');
+                if (!response.ok) {
+                    alert('Error uploading chunk ' + (chunkIndex + 1));
+                    return;
                 }
-
-                console.log('Chunks merged successfully.');
-
-                // Receive the enhanced video
-                const blob = await mergeResponse.blob();
-                const videoURL = URL.createObjectURL(blob);
-
-                // Display the enhanced video
-                loadingMessage.style.display = 'none';
-                enhancedVideo.src = videoURL;
-                resultContainer.style.display = 'block';
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred: ' + error.message);
-                loadingMessage.style.display = 'none';
             }
+
+            // Notify backend that all chunks are uploaded
+            const mergeResponse = await fetch('https://banyote.vercel.app/api/merge-chunks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileName: file.name }),
+            });
+
+            if (!mergeResponse.ok) {
+                alert('Failed to merge chunks.');
+                return;
+            }
+
+            // Receive the enhanced video
+            const blob = await mergeResponse.blob();
+            const videoURL = URL.createObjectURL(blob);
+
+            // Display the enhanced video
+            loadingMessage.style.display = 'none';
+            enhancedVideo.src = videoURL;
+            resultContainer.style.display = 'block';
+
+            // Process the video with AI
+            const model = await cocoSsd.load();
+            const videoElement = document.createElement('video');
+            videoElement.src = videoURL;
+            videoElement.addEventListener('loadeddata', async () => {
+                const predictions = await model.detect(videoElement);
+                console.log('AI Predictions:', predictions);
+                alert('AI processed your video! Check the console for detected objects.');
+            });
         });
     </script>
 </body>
+
 </html>
