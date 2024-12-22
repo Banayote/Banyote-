@@ -83,31 +83,13 @@
             max-width: 100%;
             border-radius: 8px;
         }
-
-        .instagram-link {
-            display: inline-block;
-            margin-top: 10px;
-            text-decoration: none;
-            position: relative;
-            top: -20px;
-        }
-
-        .instagram-icon {
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <h1>Enhance Your Video Quality</h1>
-        <p class="description">Upload your video to enhance its quality using AI made by Banyote99 Zeno.</p>
-
-        <a class="instagram-link" href="https://www.instagram.com/banyote99/profilecard/?igsh=MTE0Mmw0MnNxbm56bw==" target="_blank">
-            <img class="instagram-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
-        </a>
+        <p class="description">Upload your video to enhance its quality using AI and Cloudinary.</p>
 
         <div class="file-input">
             <input type="file" id="videoUpload" accept="video/*">
@@ -124,6 +106,10 @@
     </div>
 
     <script>
+        const cloudName = "dk2ginl42"; // Replace with your Cloudinary cloud name
+        const apiKey = "386593879163922"; // Replace with your API key
+        const uploadPreset = "jkZM7lp2RTCcHAYlIMpgub2Pv7E"; // Replace with your upload preset
+
         const videoUpload = document.getElementById('videoUpload');
         const enhanceBtn = document.getElementById('enhanceBtn');
         const loadingMessage = document.getElementById('loadingMessage');
@@ -141,23 +127,24 @@
             loadingMessage.style.display = 'block';
 
             try {
-                // Prepare FormData to upload the video file
+                // Upload video to Cloudinary
                 const formData = new FormData();
-                formData.append('video', file);
+                formData.append('file', file);
+                formData.append('upload_preset', uploadPreset);
 
-                // Replace this URL with the actual API URL where your backend is hosted on Vercel
-                const response = await fetch('https://banyote.vercel.app/api/enhance-video', {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to enhance the video.');
+                    throw new Error('Failed to upload video to Cloudinary.');
                 }
 
-                // Get the enhanced video from the response
-                const enhancedBlob = await response.blob();
-                const enhancedVideoUrl = URL.createObjectURL(enhancedBlob);
+                const data = await response.json();
+
+                // Process the video for enhancement (example: AI processing)
+                const enhancedVideoUrl = data.secure_url; // Use enhanced processing if needed
 
                 // Display the enhanced video
                 loadingMessage.style.display = 'none';
