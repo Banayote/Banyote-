@@ -129,90 +129,94 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <script>
-    const videoUpload = document.getElementById('videoUpload');
-    const enhanceBtn = document.getElementById('enhanceBtn');
-    const loadingMessage = document.getElementById('loadingMessage');
-    const resultContainer = document.getElementById('resultContainer');
-    const enhancedVideo = document.getElementById('enhancedVideo');
+        const videoUpload = document.getElementById('videoUpload');
+        const enhanceBtn = document.getElementById('enhanceBtn');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const resultContainer = document.getElementById('resultContainer');
+        const enhancedVideo = document.getElementById('enhancedVideo');
 
-    const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB per chunk
+        const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB per chunk
 
-    enhanceBtn.addEventListener('click', async () => {
-        const file = videoUpload.files[0];
-        if (!file) {
-            alert('Please select a video file.');
-            return;
-        }
+        enhanceBtn.addEventListener('click', async () => {
+            const file = videoUpload.files[0];
+            if (!file) {
+                alert('Please select a video file.');
+                return;
+            }
 
-        // Display loading message
-        loadingMessage.style.display = 'block';
+            // Display loading message
+            loadingMessage.style.display = 'block';
 
-        try {
-            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+            try {
+                const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
 
-            // Upload chunks sequentially
-            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-                const start = chunkIndex * CHUNK_SIZE;
-                const end = Math.min(start + CHUNK_SIZE, file.size);
-                const chunk = file.slice(start, end);
+                // Upload chunks sequentially
+                for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                    const start = chunkIndex * CHUNK_SIZE;
+                    const end = Math.min(start + CHUNK_SIZE, file.size);
+                    const chunk = file.slice(start, end);
 
-                const formData = new FormData();
-                formData.append('chunk', chunk);
-                formData.append('chunkIndex', chunkIndex);
-                formData.append('totalChunks', totalChunks);
-                formData.append('fileName', file.name);
+                    const formData = new FormData();
+                    formData.append('chunk', chunk);
+                    formData.append('chunkIndex', chunkIndex);
+                    formData.append('totalChunks', totalChunks);
+                    formData.append('fileName', file.name);
 
-                // Log the form data to see what you're sending
-                console.log(`Uploading chunk ${chunkIndex + 1}/${totalChunks}`);
-                console.log('Form data:', formData);
+                    // Add headers if needed (use a correct API key if required)
+                    const headers = new Headers();
+                    headers.append('Content-Type', 'multipart/form-data'); // Adjust if needed
 
-                const response = await fetch('https://banyote.vercel.app/api/upload-chunk', {
+                    // Log the form data to see what you're sending
+                    console.log(`Uploading chunk ${chunkIndex + 1}/${totalChunks}`);
+                    console.log('Form data:', formData);
+
+                    const response = await fetch('https://banyote.vercel.app/api/upload-chunk', {
+                        method: 'POST',
+                        headers: headers, // Added headers
+                        body: formData,
+                    });
+
+                    // Log the server response to help debug any errors
+                    const responseBody = await response.text();
+                    console.log('Server Response:', responseBody);
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to upload chunk ${chunkIndex + 1}/${totalChunks}`);
+                    }
+                }
+
+                console.log('All chunks uploaded successfully.');
+
+                // Notify backend that all chunks are uploaded
+                const mergeResponse = await fetch('https://banyote.vercel.app/api/merge-chunks', {
                     method: 'POST',
-                    body: formData,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fileName: file.name }),
                 });
 
-                // Log the server response to help debug any errors
-                const responseBody = await response.text();
-                console.log('Server Response:', responseBody);
-
-                if (!response.ok) {
-                    throw new Error(`Failed to upload chunk ${chunkIndex + 1}/${totalChunks}`);
+                if (!mergeResponse.ok) {
+                    throw new Error('Failed to merge chunks.');
                 }
+
+                console.log('Chunks merged successfully.');
+
+                // Receive the enhanced video
+                const blob = await mergeResponse.blob();
+                const videoURL = URL.createObjectURL(blob);
+
+                // Display the enhanced video
+                loadingMessage.style.display = 'none';
+                enhancedVideo.src = videoURL;
+                resultContainer.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+                loadingMessage.style.display = 'none';
             }
-
-            console.log('All chunks uploaded successfully.');
-
-            // Notify backend that all chunks are uploaded
-            const mergeResponse = await fetch('https://banyote.vercel.app/api/merge-chunks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileName: file.name }),
-            });
-
-            if (!mergeResponse.ok) {
-                throw new Error('Failed to merge chunks.');
-            }
-
-            console.log('Chunks merged successfully.');
-
-            // Receive the enhanced video
-            const blob = await mergeResponse.blob();
-            const videoURL = URL.createObjectURL(blob);
-
-            // Display the enhanced video
-            loadingMessage.style.display = 'none';
-            enhancedVideo.src = videoURL;
-            resultContainer.style.display = 'block';
-
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred: ' + error.message);
-            loadingMessage.style.display = 'none';
-        }
-    });
-</script>
+        });
+    </script>
 
 </body>
 
 </html>
-
