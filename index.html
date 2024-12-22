@@ -129,25 +129,28 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <script>
-        const videoUpload = document.getElementById('videoUpload');
-        const enhanceBtn = document.getElementById('enhanceBtn');
-        const loadingMessage = document.getElementById('loadingMessage');
-        const resultContainer = document.getElementById('resultContainer');
-        const enhancedVideo = document.getElementById('enhancedVideo');
-        const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB per chunk
+    const videoUpload = document.getElementById('videoUpload');
+    const enhanceBtn = document.getElementById('enhanceBtn');
+    const loadingMessage = document.getElementById('loadingMessage');
+    const resultContainer = document.getElementById('resultContainer');
+    const enhancedVideo = document.getElementById('enhancedVideo');
 
-        enhanceBtn.addEventListener('click', async () => {
-            const file = videoUpload.files[0];
-            if (!file) {
-                alert('Please select a video file.');
-                return;
-            }
+    const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB per chunk
 
-            // Display loading message
-            loadingMessage.style.display = 'block';
+    enhanceBtn.addEventListener('click', async () => {
+        const file = videoUpload.files[0];
+        if (!file) {
+            alert('Please select a video file.');
+            return;
+        }
 
-            // Start uploading the file in chunks
+        // Display loading message
+        loadingMessage.style.display = 'block';
+
+        try {
             const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+
+            // Upload chunks sequentially
             for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
                 const start = chunkIndex * CHUNK_SIZE;
                 const end = Math.min(start + CHUNK_SIZE, file.size);
@@ -159,18 +162,25 @@
                 formData.append('totalChunks', totalChunks);
                 formData.append('fileName', file.name);
 
+                // Log the form data to see what you're sending
                 console.log(`Uploading chunk ${chunkIndex + 1}/${totalChunks}`);
+                console.log('Form data:', formData);
 
                 const response = await fetch('https://banyote.vercel.app/api/upload-chunk', {
                     method: 'POST',
                     body: formData,
                 });
 
+                // Log the server response to help debug any errors
+                const responseBody = await response.text();
+                console.log('Server Response:', responseBody);
+
                 if (!response.ok) {
-                    alert('Error uploading chunk ' + (chunkIndex + 1));
-                    return;
+                    throw new Error(`Failed to upload chunk ${chunkIndex + 1}/${totalChunks}`);
                 }
             }
+
+            console.log('All chunks uploaded successfully.');
 
             // Notify backend that all chunks are uploaded
             const mergeResponse = await fetch('https://banyote.vercel.app/api/merge-chunks', {
@@ -180,9 +190,10 @@
             });
 
             if (!mergeResponse.ok) {
-                alert('Failed to merge chunks.');
-                return;
+                throw new Error('Failed to merge chunks.');
             }
+
+            console.log('Chunks merged successfully.');
 
             // Receive the enhanced video
             const blob = await mergeResponse.blob();
@@ -193,17 +204,15 @@
             enhancedVideo.src = videoURL;
             resultContainer.style.display = 'block';
 
-            // Process the video with AI
-            const model = await cocoSsd.load();
-            const videoElement = document.createElement('video');
-            videoElement.src = videoURL;
-            videoElement.addEventListener('loadeddata', async () => {
-                const predictions = await model.detect(videoElement);
-                console.log('AI Predictions:', predictions);
-                alert('AI processed your video! Check the console for detected objects.');
-            });
-        });
-    </script>
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred: ' + error.message);
+            loadingMessage.style.display = 'none';
+        }
+    });
+</script>
+
 </body>
 
 </html>
+
