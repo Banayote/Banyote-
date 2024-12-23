@@ -141,8 +141,6 @@
                 }
 
                 const data = await response.json();
-
-                // Get the Cloudinary video URL
                 const videoUrl = data.secure_url;
 
                 // Send the video URL to your Vercel API for enhancement
@@ -169,6 +167,5 @@
             }
         });
     </script>
-
 </body>
 </html>
