@@ -1,58 +1,24 @@
-import fs from 'fs';
-import path from 'path';
-
-export const config = {
-    api: {
-        bodyParser: false, // Disable default body parser for file uploads
-    },
-};
-
+// /api/enhance-video.js
 export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
-    }
+    if (req.method === 'POST') {
+        const { videoUrl } = req.body;
 
-    // Import formidable to handle file uploads
-    const formidable = await import('formidable');
-    const form = new formidable.IncomingForm({ uploadDir: '/tmp', keepExtensions: true });
-
-    form.parse(req, async (err, fields, files) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ error: 'Error parsing the file' });
+        if (!videoUrl) {
+            return res.status(400).json({ error: 'Video URL is required' });
         }
 
-        const { video } = files;
-        if (!video) {
-            return res.status(400).json({ error: 'No video file uploaded' });
-        }
-
-        // Check if video is too large (can be adjusted to suit your requirements)
-        const MAX_SIZE = 100 * 1024 * 1024; // 100MB
-        if (video.size > MAX_SIZE) {
-            return res.status(413).json({ error: 'Video file is too large. Max size is 100MB.' });
-        }
-
-        // Perform video enhancement logic here (e.g., Real-ESRGAN)
         try {
-            // Sample enhancement logic (this should be replaced with your AI code)
-            const enhancedVideoPath = await enhanceVideo(video.path);  // Run your AI enhancement function here
+            // Here, you would enhance the video (e.g., send to AI model or another API)
+            // For this example, we just return the same URL
+            const enhancedUrl = videoUrl;  // For simplicity, you can replace this with actual enhancement logic
 
-            // Return the enhanced video as response
-            res.status(200).sendFile(enhancedVideoPath);
+            return res.status(200).json({ url: enhancedUrl });
         } catch (error) {
             console.error('Error enhancing video:', error);
-            return res.status(500).json({ error: 'Error enhancing the video.' });
+            return res.status(500).json({ error: 'Failed to enhance video' });
         }
-    });
-}
-
-// Dummy enhancement function (replace this with your actual AI logic)
-async function enhanceVideo(videoPath) {
-    // Replace with real enhancement logic using Real-ESRGAN or any other AI model
-    const enhancedVideoPath = '/tmp/enhanced_video.mp4';
-    // Add your AI processing here and save the enhanced video to enhancedVideoPath
-
-    return enhancedVideoPath;
+    } else {
+        return res.status(405).json({ error: 'Method Not Allowed' });
+    }
 }
 
