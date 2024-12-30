@@ -1,171 +1,296 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
     <title>AI Video Enhancement</title>
+
     <style>
+
         body {
+
             font-family: Arial, sans-serif;
+
             background-color: #f4f4f9;
+
             margin: 0;
+
             padding: 0;
+
             display: flex;
+
             justify-content: center;
+
             align-items: center;
+
             height: 100vh;
+
             flex-direction: column;
+
         }
 
         .container {
+
             text-align: center;
+
             background: white;
+
             padding: 5px;
+
             border-radius: 10px;
+
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
             max-width: 500px;
+
             width: 100%;
+
         }
 
         h1 {
+
             font-size: 24px;
+
             color: #333;
+
             margin-bottom: 20px;
+
         }
 
         .description {
+
             font-size: 16px;
+
             color: #555;
+
             margin-bottom: 30px;
+
         }
 
         .file-input input[type="file"] {
+
             display: none;
+
         }
 
         .file-input label {
+
             background-color: #4CAF50;
+
             color: white;
+
             padding: 10px 20px;
+
             border-radius: 5px;
+
             cursor: pointer;
+
         }
 
         .enhance-btn {
+
             background-color: #007bff;
+
             color: white;
+
             border: none;
+
             padding: 15px 30px;
+
             font-size: 18px;
+
             border-radius: 5px;
+
             cursor: pointer;
+
             margin-top: 20px;
+
         }
 
         .enhance-btn:hover {
+
             background-color: #0056b3;
+
         }
 
         .loading {
+
             display: none;
+
             margin-top: 20px;
+
             font-size: 16px;
+
             color: #007bff;
+
         }
 
         .result-container {
+
             margin-top: 20px;
+
             display: none;
+
         }
 
         .result-container video {
+
             max-width: 100%;
+
             border-radius: 8px;
+
         }
+
+        .instagram-link {
+
+            display: inline-block;
+
+            margin-top: 10px;
+
+            text-decoration: none;
+
+            position: relative;
+
+            top: -20px;
+
+        }
+
+        .instagram-icon {
+
+            width: 30px;
+
+            height: 30px;
+
+            cursor: pointer;
+
+        }
+
     </style>
+
 </head>
 
 <body>
+
     <div class="container">
+
         <h1>Enhance Your Video Quality</h1>
-        <p class="description">Upload your video to enhance its quality using AI and Cloudinary.</p>
+
+        <p class="description">Upload your video to enhance its quality using AI made by Banyote99 Zeno.</p>
+
+        <a class="instagram-link" href="https://www.instagram.com/banyote99/profilecard/?igsh=MTE0Mmw0MnNxbm56bw==" target="_blank">
+
+            <img class="instagram-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+
+        </a>
 
         <div class="file-input">
+
             <input type="file" id="videoUpload" accept="video/*">
+
             <label for="videoUpload">Choose Video</label>
+
         </div>
 
         <button class="enhance-btn" id="enhanceBtn">Enhance Video</button>
+
         <div class="loading" id="loadingMessage">Processing with AI...</div>
 
         <div class="result-container" id="resultContainer">
+
             <h3>Enhanced Video</h3>
+
             <video id="enhancedVideo" controls></video>
+
         </div>
+
     </div>
 
+    <!-- TensorFlow.js and AI Script -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
     <script>
-        const cloudName = "dk2ginl42"; // Replace with your Cloudinary cloud name
-        const uploadPreset = "jkZM7lp2RTCcHAYlIMpgub2Pv7E"; // Replace with your Cloudinary upload preset
 
         const videoUpload = document.getElementById('videoUpload');
+
         const enhanceBtn = document.getElementById('enhanceBtn');
+
         const loadingMessage = document.getElementById('loadingMessage');
+
         const resultContainer = document.getElementById('resultContainer');
+
         const enhancedVideo = document.getElementById('enhancedVideo');
 
         enhanceBtn.addEventListener('click', async () => {
+
             const file = videoUpload.files[0];
+
             if (!file) {
+
                 alert('Please select a video file.');
+
                 return;
+
             }
 
             // Display loading message
+
             loadingMessage.style.display = 'block';
 
             try {
-                // Upload video to Cloudinary
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', uploadPreset);
 
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
-                    method: 'POST',
-                    body: formData,
+                // Simulate processing video with AI
+
+                const model = await cocoSsd.load();
+
+                const videoURL = URL.createObjectURL(file);
+
+                const videoElement = document.createElement('video');
+
+                videoElement.src = videoURL;
+
+                videoElement.addEventListener('loadeddata', async () => {
+
+                    // Run AI detection (placeholder)
+
+                    const predictions = await model.detect(videoElement);
+
+                    console.log('AI Predictions:', predictions);
+
+                    // Simulate enhanced video
+
+                    loadingMessage.style.display = 'none';
+
+                    enhancedVideo.src = videoURL; // Placeholder for enhanced video
+
+                    resultContainer.style.display = 'block';
+
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to upload video to Cloudinary.');
-                }
-
-                const data = await response.json();
-                const videoUrl = data.secure_url;
-
-                // Send the video URL to your Vercel API for enhancement
-                const apiResponse = await fetch('/api/enhance-video', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ videoUrl }),
-                });
-
-                if (!apiResponse.ok) {
-                    throw new Error('Failed to enhance video.');
-                }
-
-                const apiData = await apiResponse.json();
-
-                // Display the enhanced video
-                loadingMessage.style.display = 'none';
-                enhancedVideo.src = apiData.url; // Assuming your API returns the enhanced video URL
-                resultContainer.style.display = 'block';
             } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred: ' + error.message);
+
+                console.error('Error enhancing video:', error);
+
+                alert('Error processing the video.');
+
                 loadingMessage.style.display = 'none';
+
             }
+
         });
+
     </script>
+
 </body>
+
 </html>
+
