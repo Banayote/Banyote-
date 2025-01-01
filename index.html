@@ -1,296 +1,233 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
     <title>AI Video Enhancement</title>
-
     <style>
-
         body {
-
             font-family: Arial, sans-serif;
-
-            background-color: #f4f4f9;
-
+            background-color: white;
             margin: 0;
-
             padding: 0;
-
             display: flex;
-
             justify-content: center;
-
             align-items: center;
-
             height: 100vh;
-
             flex-direction: column;
-
         }
-
         .container {
-
             text-align: center;
-
             background: white;
-
             padding: 5px;
-
             border-radius: 10px;
-
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.0);
             max-width: 500px;
-
             width: 100%;
-
         }
-
         h1 {
-
             font-size: 24px;
-
             color: #333;
-
             margin-bottom: 20px;
-
         }
-
         .description {
-
             font-size: 16px;
-
             color: #555;
-
             margin-bottom: 30px;
-
         }
-
         .file-input input[type="file"] {
-
             display: none;
-
         }
-
         .file-input label {
-
-            background-color: #4CAF50;
-
+            background-color: green;
             color: white;
-
             padding: 10px 20px;
-
             border-radius: 5px;
-
             cursor: pointer;
-
         }
-
         .enhance-btn {
-
-            background-color: #007bff;
-
+            background-color: pink;
             color: white;
-
             border: none;
-
             padding: 15px 30px;
-
             font-size: 18px;
-
             border-radius: 5px;
-
             cursor: pointer;
-
             margin-top: 20px;
-
         }
-
         .enhance-btn:hover {
-
-            background-color: #0056b3;
-
+            background-color: purple;
         }
-
         .loading {
-
             display: none;
-
             margin-top: 20px;
-
             font-size: 16px;
-
             color: #007bff;
-
         }
-
         .result-container {
-
             margin-top: 20px;
-
             display: none;
-
-        }
-
-        .result-container video {
-
-            max-width: 100%;
-
-            border-radius: 8px;
-
-        }
-
-        .instagram-link {
-
-            display: inline-block;
-
-            margin-top: 10px;
-
-            text-decoration: none;
-
             position: relative;
-
-            top: -20px;
-
         }
-
-        .instagram-icon {
-
-            width: 30px;
-
-            height: 30px;
-
+        .result-container video {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
             cursor: pointer;
-
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .download-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .logo {
+            font-size: 54px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: inline-block;
+            position: relative;
+            color: black;
+        }
+        .logo .pointer {
+            position: absolute;
+            top: 120%;
+            left: -25px;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid black;
+            transform: translateY(-50%);
+            animation: slidePointer 2s infinite ease-in-out;
+        }
+        @keyframes slidePointer {
+            0% { left: -5px; }
+            50% { left: 109px; }
+            100% { left: -5px; }
+        }
+        .logo .highlight {
+            color: pink;
+        }
+        .logo .highlight-green {
+            color: green;
+        }
+        .instagram-link {
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+            position: relative;
+            top: -10px;
+        }
+        .instagram-icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
         }
 
+        /* Add custom styling for the witch image */
+        .witch-image {
+            width: 200px;
+            height: auto;
+            margin-top: 20px;
+            animation: moveWitch 4s ease-in-out infinite;
+        }
+
+        @keyframes moveWitch {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
     </style>
-
 </head>
-
 <body>
-
     <div class="container">
-
+        <!-- Add your sexy anime witch PNG -->
+        <img src="gq14goknfl3ntoc8g8um8pe5rf-bdd0e484fadc136ea0a8def5d2309f47.png" alt="Sexy Anime Witch" class="witch-image">
+        <div class="logo">
+            <div class="pointer"></div>
+            <span class="highlight">b</span>ad 
+            <span class="highlight-green">W</span>itch
+        </div>
         <h1>Enhance Your Video Quality</h1>
-
-        <p class="description">Upload your video to enhance its quality using AI made by Banyote99 Zeno.</p>
-
+        <p class="description">Upload your video to enhance its quality using AI made by Banyote99 Zeno</p>
         <a class="instagram-link" href="https://www.instagram.com/banyote99/profilecard/?igsh=MTE0Mmw0MnNxbm56bw==" target="_blank">
-
             <img class="instagram-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
-
         </a>
-
         <div class="file-input">
-
             <input type="file" id="videoUpload" accept="video/*">
-
             <label for="videoUpload">Choose Video</label>
-
         </div>
-
         <button class="enhance-btn" id="enhanceBtn">Enhance Video</button>
-
         <div class="loading" id="loadingMessage">Processing with AI...</div>
-
         <div class="result-container" id="resultContainer">
-
+            <button class="remove-btn" id="removeBtn">Remove</button>
             <h3>Enhanced Video</h3>
-
             <video id="enhancedVideo" controls></video>
-
+            <button class="download-btn" id="downloadBtn">Download Video</button>
         </div>
-
     </div>
-
-    <!-- TensorFlow.js and AI Script -->
-
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
-
     <script>
-
         const videoUpload = document.getElementById('videoUpload');
-
         const enhanceBtn = document.getElementById('enhanceBtn');
-
         const loadingMessage = document.getElementById('loadingMessage');
-
         const resultContainer = document.getElementById('resultContainer');
-
         const enhancedVideo = document.getElementById('enhancedVideo');
+        const removeBtn = document.getElementById('removeBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
 
         enhanceBtn.addEventListener('click', async () => {
-
             const file = videoUpload.files[0];
-
             if (!file) {
-
                 alert('Please select a video file.');
-
                 return;
-
             }
-
-            // Display loading message
-
             loadingMessage.style.display = 'block';
-
             try {
-
-                // Simulate processing video with AI
-
                 const model = await cocoSsd.load();
-
                 const videoURL = URL.createObjectURL(file);
-
                 const videoElement = document.createElement('video');
-
                 videoElement.src = videoURL;
-
                 videoElement.addEventListener('loadeddata', async () => {
-
-                    // Run AI detection (placeholder)
-
                     const predictions = await model.detect(videoElement);
-
                     console.log('AI Predictions:', predictions);
-
-                    // Simulate enhanced video
-
                     loadingMessage.style.display = 'none';
-
                     enhancedVideo.src = videoURL; // Placeholder for enhanced video
-
                     resultContainer.style.display = 'block';
-
+                    downloadBtn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = videoURL;
+                        a.download = 'enhanced_video.mp4';
+                        a.click();
+                    };
                 });
-
             } catch (error) {
-
                 console.error('Error enhancing video:', error);
-
                 alert('Error processing the video.');
-
                 loadingMessage.style.display = 'none';
-
             }
-
         });
 
+        removeBtn.addEventListener('click', () => {
+            resultContainer.style.display = 'none';
+            enhancedVideo.src = '';
+        });
     </script>
-
 </body>
-
 </html>
-
