@@ -3,11 +3,11 @@
   "routes": [
     {
       "src": "/add-product",
-      "dest": "/add-product.html"
+      "dest": "/public/add-product.html"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/public/index.html"
     }
   ]
 }
