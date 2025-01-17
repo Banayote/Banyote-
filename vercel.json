@@ -1,13 +1,1 @@
-{
-  "version": 2,
-  "routes": [
-    {
-      "src": "/add-product",
-      "dest": "/public/add-product.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/index.html"
-    }
-  ]
-}
+
