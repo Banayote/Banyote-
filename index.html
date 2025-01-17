@@ -1,156 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Pink Closet</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>AI Video Enhancement</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: white;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
         }
-        .menu-icon {
-            font-size: 30px;
-            cursor: pointer;
-            padding: 10px;
-            z-index: 1001;
-        }
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 250px;
-            height: 100%;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.5);
-            display: none;
-            background-color: #fff;
-            z-index: 1000;
-            transition: 0.3s ease;
-        }
-        .sidebar.active {
-            display: block;
-        }
-        .close-btn {
-            font-size: 30px;
-            cursor: pointer;
-            padding: 10px;
-            background: none;
-            border: none;
-        }
-        .sidebar-content {
-            padding: 20px;
-        }
-        .sidebar-item {
-            display: block;
-            padding: 10px;
-            color: black;
-            text-decoration: none;
-        }
-        .sidebar-item:hover {
-            background-color: #ddd;
-        }
-        .product {
-            border: 1px solid #ccc;
-            margin: 10px;
-            padding: 10px;
+        .container {
             text-align: center;
+            background: white;
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.0);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .description {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 30px;
+        }
+        .file-input input[type="file"] {
+            display: none;
+        }
+        .file-input label {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
         }
-        .product img {
+        .enhance-btn {
+            background-color: pink;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .enhance-btn:hover {
+            background-color: purple;
+        }
+        .loading {
+            display: none;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #007bff;
+        }
+        .result-container {
+            margin-top: 20px;
+            display: none;
+            position: relative;
+        }
+        .result-container video {
             max-width: 100%;
-            height: auto;
+            border-radius: 8px;
+        }
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .download-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .logo {
+            font-size: 54px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: inline-block;
+            position: relative;
+            color: black;
+        }
+        .logo .pointer {
+            position: absolute;
+            top: 120%;
+            left: -25px; /* Adjust for the left position */
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid black; /* Traditional arrow effect */
+            transform: translateY(-50%);
+            animation: slidePointer 2s infinite ease-in-out;
+        }
+        @keyframes slidePointer {
+            0% { left: -5px; }
+            50% { left: 109px; } /* Move the pointer across to the "W" */
+            100% { left: -5px; }
+        }
+        .logo .highlight {
+            color: pink;
+        }
+        .logo .highlight-green {
+            color: green;
+        }
+        .instagram-link {
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+            position: relative;
+            top: -10px;
+        }
+        .instagram-icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
         }
     </style>
 </head>
-
 <body>
-    <header>
-        <div id="menuIcon" class="menu-icon">&#9776;</div>
-        <h1 id="storeName">The Pink Closet</h1>
-        <div class="search-bar">
-            <input type="text" id="search-input" placeholder="Search products...">
-            <button id="search-button">Search</button>
+    <div class="container">
+        <div class="logo">
+            <div class="pointer"></div>
+            <span class="highlight">b</span>ad 
+            <span class="highlight-green">W</span>itch
         </div>
-    </header>
-    <main>
-        <section id="main-content">
-            <div id="product-list"></div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; The Pink Closet 2024. All rights reserved.</p>
-    </footer>
-
-    <div id="sidebar" class="sidebar">
-        <button id="closeBtn" class="close-btn">&times;</button>
-        <div class="sidebar-content">
-            <a href="profile.html" id="profileLink" class="sidebar-item">Profile</a>
-            <a href="store.html" class="sidebar-item">Create Store</a>
-            <a href="login.html" class="sidebar-item">Login</a>
-            <a href="messages.html" class="sidebar-item">Messages</a>
+        <h1>Enhance Your Video Quality</h1>
+        <p class="description">Upload your video to enhance its quality using AI made by Banyote99 Zeno</p>
+        <a class="instagram-link" href="https://www.instagram.com/banyote99/profilecard/?igsh=MTE0Mmw0MnNxbm56bw==" target="_blank">
+            <img class="instagram-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+        </a>
+        <div class="file-input">
+            <input type="file" id="videoUpload" accept="video/*">
+            <label for="videoUpload">Choose Video</label>
+        </div>
+        <button class="enhance-btn" id="enhanceBtn">Enhance Video</button>
+        <div class="loading" id="loadingMessage">Processing with AI...</div>
+        <div class="result-container" id="resultContainer">
+            <button class="remove-btn" id="removeBtn">Remove</button>
+            <h3>Enhanced Video</h3>
+            <video id="enhancedVideo" controls></video>
+            <button class="download-btn" id="downloadBtn">Download Video</button>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
     <script>
-        const supabase = supabase.createClient(
-            'https://eczpdpysryifkekieloc.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjenBkcHlzcnlpZmtla2llbG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIwMjQ2NDUsImV4cCI6MjA0NzYwMDY0NX0.lxC6cqnwH9hMbGC4AsE5W6JRt34eyp4MxhNtAl0MdM4'
-        );
+        const videoUpload = document.getElementById('videoUpload');
+        const enhanceBtn = document.getElementById('enhanceBtn');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const resultContainer = document.getElementById('resultContainer');
+        const enhancedVideo = document.getElementById('enhancedVideo');
+        const removeBtn = document.getElementById('removeBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuIcon = document.getElementById('menuIcon');
-            const sidebar = document.getElementById('sidebar');
-            const closeBtn = document.getElementById('closeBtn');
-            const productList = document.getElementById('product-list');
-
-            function openSidebar() {
-                sidebar.classList.add('active');
+        enhanceBtn.addEventListener('click', async () => {
+            const file = videoUpload.files[0];
+            if (!file) {
+                alert('Please select a video file.');
+                return;
             }
-
-            function closeSidebar() {
-                sidebar.classList.remove('active');
-            }
-
-            menuIcon.addEventListener('click', openSidebar);
-            closeBtn.addEventListener('click', closeSidebar);
-
-            window.addEventListener('click', function(event) {
-                if (event.target === sidebar) {
-                    closeSidebar();
-                }
-            });
-
-            async function loadProducts() {
-                const { data: products, error } = await supabase.from('products').select();
-                if (error) {
-                    console.error('Error loading products:', error);
-                    return;
-                }
-
-                productList.innerHTML = '';
-                products.forEach((product) => {
-                    const productDiv = document.createElement('div');
-                    productDiv.classList.add('product');
-                    productDiv.innerHTML = `
-                        <h2>${product.name}</h2>
-                        <p>${product.description}</p>
-                        <p>Price: $${parseFloat(product.price).toFixed(2)}</p>
-                        <img src="${product.image_url}" alt="${product.name}">
-                    `;
-                    productDiv.addEventListener('click', () => {
-                        alert(`You clicked on ${product.name}`);
-                    });
-                    productList.appendChild(productDiv);
+            loadingMessage.style.display = 'block';
+            try {
+                const model = await cocoSsd.load();
+                const videoURL = URL.createObjectURL(file);
+                const videoElement = document.createElement('video');
+                videoElement.src = videoURL;
+                videoElement.addEventListener('loadeddata', async () => {
+                    const predictions = await model.detect(videoElement);
+                    console.log('AI Predictions:', predictions);
+                    loadingMessage.style.display = 'none';
+                    enhancedVideo.src = videoURL; // Placeholder for enhanced video
+                    resultContainer.style.display = 'block';
+                    downloadBtn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = videoURL;
+                        a.download = 'enhanced_video.mp4';
+                        a.click();
+                    };
                 });
+            } catch (error) {
+                console.error('Error enhancing video:', error);
+                alert('Error processing the video.');
+                loadingMessage.style.display = 'none';
             }
+        });
 
-            window.onload = loadProducts;
+        removeBtn.addEventListener('click', () => {
+            resultContainer.style.display = 'none';
+            enhancedVideo.src = '';
         });
     </script>
 </body>
-
 </html>
