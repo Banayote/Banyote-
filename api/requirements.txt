@@ -1,4 +1,0 @@
-Flask==2.2.3
-torch==2.2.0
-opencv-python==4.7.0.72
-werkzeug==2.2.3
